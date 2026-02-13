@@ -13,7 +13,7 @@ variable "s3_bucket_name" {
   type        = string
 }
 
-# variable "step_function_name" {
-#   description = "Nome da função Step Function"
-#   type        = string
-# }
+variable "step_function_name" {
+  description = "Nome da função Step Function"
+  type        = string
+}

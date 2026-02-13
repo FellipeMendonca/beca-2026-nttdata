@@ -30,32 +30,32 @@ resource "aws_s3_bucket" "pokeapi_bucket" {
   }
 }
 
-# module "step_function" {
-#   source = "terraform-aws-modules/step-functions/aws"
+module "step_function" {
+  source = "terraform-aws-modules/step-functions/aws"
 
-#   name       = var.step_function_name
-#   definition = <<EOF
-# {
-#   "Comment": "ETL responsável por orquestrar a execução da função Lambda e dos jobs do Glue para processar os dados da PokeAPI.",
-#   "StartAt": "Get Data",
-#   "States": {
-#     "Get Data": {
-#       "Type": "Task",
-#       "Resource": "arn:aws:states:::lambda:invoke",
-#       "ResultPath": "$.lambda_output",
-#       "Parameters": {
-#         "FunctionName": "${var.lambda_function_name}",
-#         "Payload": {}
-#       },
-#       "End": true
-#     }
-#   }
-# }
-# EOF
-#   tags = {
-#     Name        = "beca-2026-pokeapi-etl"
-#     Squad       = "Formação 2026"
-#     Company     = "NTT Data"
-#     Environment = var.environment
-#   }
-# }
+  name       = var.step_function_name
+  definition = <<EOF
+{
+  "Comment": "ETL responsável por orquestrar a execução da função Lambda e dos jobs do Glue para processar os dados da PokeAPI.",
+  "StartAt": "Get Data",
+  "States": {
+    "Get Data": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "ResultPath": "$.lambda_output",
+      "Parameters": {
+        "FunctionName": "${var.lambda_function_name}",
+        "Payload": {}
+      },
+      "End": true
+    }
+  }
+}
+EOF
+  tags = {
+    Name        = "beca-2026-pokeapi-etl"
+    Squad       = "Formação 2026"
+    Company     = "NTT Data"
+    Environment = var.environment
+  }
+}
