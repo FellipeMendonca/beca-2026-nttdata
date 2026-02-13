@@ -1,9 +1,9 @@
-name: "Develop Workflow"
+name: "Production Workflow"
 
 on:
   push:
     branches:
-      - develop
+      - main
 
 permissions:
   id-token: write
@@ -11,9 +11,9 @@ permissions:
 
 jobs:
   terraform:
-    uses: ./.github/workflows/terraform.yml
+    uses: ./.github/workflows/00-terraform.yml
     with:
-      environment: "dev"
+      environment: "prd"
       aws-assume-role-arn: "arn:aws:iam::163867913141:role/github-actions-FellipeMendonca-pipeline"
       aws-region: "us-east-1"
       aws-statefile-s3-bucket: "fellipemendonca-us-east-1-terraform-statefile"

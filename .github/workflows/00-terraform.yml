@@ -46,10 +46,10 @@ jobs:
                   aws-region: ${{ inputs.aws-region }}
 
             - name: "Initialize Terraform"
-              run: cd infra && terraform init \
-                  -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}" \
-                  -backend-config="key=${{ github.event.repository.name }}" \
-                  -backend-config="region=${{ inputs.aws-region }}" \
+              run: cd infra && terraform init
+                  -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}"
+                  -backend-config="key=${{ github.event.repository.name }}"
+                  -backend-config="region=${{ inputs.aws-region }}"
                   -backend-config="dynamodb_table=${{ inputs.aws-lock-dynamodb-table }}"
 
             - name: "Terraform Validate"
@@ -57,12 +57,12 @@ jobs:
 
             - name: "Plan Terraform changes"
               id: terraform-plan
-              run: cd infra && \
+              run: cd infra &&
                   terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
                   terraform plan -var-file=./envs/${{ inputs.environment }}/terraform.tfvars -out="${{ inputs.environment }}.tfplan"
 
             - name: "Apply Terraform changes"
               id: terraform-apply
-              run: cd infra && \
+              run: cd infra &&
                   terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
                   terraform apply "${{ inputs.environment }}.tfplan"
