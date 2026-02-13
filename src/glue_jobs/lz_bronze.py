@@ -12,7 +12,7 @@ glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 
 # Define source and destination S3 buckets
-source_bucket = "s3://dev-us-east-1-beca-2026-bucket-pokeapi /LZ/pokemon_data.json"
+source_bucket = "s3://dev-us-east-1-beca-2026-bucket-pokeapi/LZ/pokemon_data.json"
 destination_bucket = (
     "s3://dev-us-east-1-beca-2026-bucket-pokeapi/BRONZE/pokemon_data.parquet"
 )
@@ -35,7 +35,7 @@ def delete_s3_files(bucket_name, prefix):
 def main():
     try:
         # Delete existing files in destination bucket before writing new ones
-        delete_s3_files("dev-us-east-1-beca-2026-bucket-pokeapi ", "BRONZE/")
+        delete_s3_files("dev-us-east-1-beca-2026-bucket-pokeapi", "BRONZE/")
 
         # Read JSON data from S3
         pokemon_df = spark.read.json(source_bucket)

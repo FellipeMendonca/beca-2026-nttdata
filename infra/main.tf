@@ -35,7 +35,7 @@ resource "aws_s3_bucket" "pokeapi_bucket" {
 
 resource "aws_s3_object" "lz_bronze_gj_pokeapi_etl_script" {
   bucket = aws_s3_bucket.pokeapi_bucket.id
-  key    = "jobs/etl_job.py"
+  key    = "jobs/lz_bronze.py"
   source = "../src/glue_jobs/lz_bronze.py"
 }
 
@@ -69,7 +69,7 @@ resource "aws_glue_job" "lz_bronze_gj_pokeapi_etl" {
   execution_class   = "STANDARD"
 
   command {
-    script_location = "s3://${aws_s3_bucket.pokeapi_bucket.bucket}/jobs/etl_job.py"
+    script_location = "s3://${aws_s3_bucket.pokeapi_bucket.bucket}/jobs/lz_bronze.py"
     name            = "glueetl"
     python_version  = "3"
   }
