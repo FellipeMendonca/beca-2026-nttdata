@@ -5,6 +5,8 @@ module "lambda_function" {
   description   = "Lambda que consulta a PokeAPI e retorna os dados de um Pokémon específico."
   handler       = "index.lambda_handler"
   runtime       = "python3.12"
+  timeout       = 120
+  memory_size   = 512
 
   layers = ["arn:aws:lambda:us-east-1:336392948345:layer:AWSSDKPandas-Python312:22"]
 
