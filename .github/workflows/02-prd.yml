@@ -1,0 +1,20 @@
+name: "Develop Workflow"
+
+on:
+  push:
+    branches:
+      - develop
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    uses: ./.github/workflows/00-terraform.yml
+    with:
+      environment: "prd"
+      aws-assume-role-arn: "arn:aws:iam::163867913141:role/github-actions-FellipeMendonca-pipeline"
+      aws-region: "us-east-1"
+      aws-statefile-s3-bucket: "fellipemendonca-us-east-1-terraform-statefile"
+      aws-lock-dynamodb-table: "fellipemendonca-us-east-1-terraform-lock"

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   terraform:
-    uses: ./.github/workflows/terraform.yml
+    uses: ./.github/workflows/00-terraform.yml
     with:
       environment: "dev"
       aws-assume-role-arn: "arn:aws:iam::163867913141:role/github-actions-FellipeMendonca-pipeline"
