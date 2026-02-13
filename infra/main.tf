@@ -36,7 +36,7 @@ resource "aws_s3_bucket" "pokeapi_bucket" {
 resource "aws_s3_object" "lz_bronze_gj_pokeapi_etl_script" {
   bucket = aws_s3_bucket.pokeapi_bucket.id
   key    = "jobs/etl_job.py"
-  source = "jobs/etl_job.py"
+  source = "../src/glue_jobs/lz_bronze.py"
 }
 
 resource "aws_iam_role" "glue_job_role" {
