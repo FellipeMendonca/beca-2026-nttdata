@@ -49,7 +49,7 @@ jobs:
               id: read-destroy-config
               run: |
                   DESTROY="$(jq -r '.["${{ inputs.environment }}"]' ./infra/destroy_config.json)"
-                  echo "destroy=$(echo DESTROY)" >> $GITHUB_OUTPUT
+                  echo "destroy=$(echo $DESTROY)" >> $GITHUB_OUTPUT
 
             - name: "Initialize Terraform"
               run: cd infra && terraform init
