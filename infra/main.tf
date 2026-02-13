@@ -186,15 +186,39 @@ module "step_function" {
   definition = <<EOF
 {
   "Comment": "ETL responsável por orquestrar a execução da função Lambda e dos jobs do Glue para processar os dados da PokeAPI.",
-  "StartAt": "Get Data",
+  "StartAt": "Get Data to LZ",
   "States": {
-    "Get Data": {
+    "Get Data to LZ": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
       "ResultPath": "$.lambda_output",
       "Parameters": {
-        "FunctionName": "${var.lambda_function_name}",
+        "FunctionName": "${module.lambda_function.function_name}",
         "Payload": {}
+      },
+      "Next": "LZ to BRONZE"
+    },
+    "LZ to BRONZE": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${aws_glue_job.lz_bronze_gj_pokeapi_etl.name}"
+      },
+      "Next": "BRONZE to SILVER"
+    },
+    "BRONZE to SILVER": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${aws_glue_job.bronze_silver_gj_pokeapi_etl.name}"
+      },
+      "Next": "SILVER to GOLD"
+    },
+    "SILVER to GOLD": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "${aws_glue_job.silver_gold_gj_pokeapi_etl.name}"
       },
       "End": true
     }
