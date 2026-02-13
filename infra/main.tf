@@ -193,7 +193,7 @@ module "step_function" {
       "Resource": "arn:aws:states:::lambda:invoke",
       "ResultPath": "$.lambda_output",
       "Parameters": {
-        "FunctionName": "${module.lambda_function.function_name}",
+        "FunctionName": "${var.lambda_function_name}",
         "Payload": {}
       },
       "Next": "LZ to BRONZE"
