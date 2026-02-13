@@ -32,6 +32,69 @@ resource "aws_s3_bucket" "pokeapi_bucket" {
   }
 }
 
+resource "aws_glue_job" "lz_bronze_gj_pokeapi_etl" {
+  name              = var.lz_bronze_glue_job_name_pokeapi
+  description       = "Glue responsável por processar os dados da LZ para Bronze transformando em um formato otimizado para análise e consulta."
+  role_arn          = aws_iam_role.glue_job_role.arn
+  glue_version      = "5.0"
+  max_retries       = 0
+  timeout           = 2880
+  number_of_workers = 10
+  worker_type       = "G.1X"
+  execution_class   = "STANDARD"
+
+  command {
+    script_location = "s3://${aws_s3_bucket.glue_scripts.bucket}/jobs/etl_job.py"
+    name            = "glueetl"
+    python_version  = "3"
+  }
+
+  notification_property {
+    notify_delay_after = 3 # delay in minutes
+  }
+
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--continuous-log-logGroup"          = "/aws-glue/jobs"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--enable-continuous-log-filter"     = "true"
+  }
+
+  execution_property {
+    max_concurrent_runs = 1
+  }
+
+  tags = {
+    Name        = "beca-2026-pokeapi-etl"
+    Squad       = "Formação 2026"
+    Company     = "NTT Data"
+    Environment = var.environment
+  }
+}
+
+resource "aws_iam_role" "glue_job_role" {
+  name = "glue-job-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "glue.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_s3_object" "glue_etl_script" {
+  bucket = aws_s3_bucket.glue_scripts.id
+  key    = "jobs/etl_job.py"
+  source = "jobs/etl_job.py"
+}
+
 module "step_function" {
   source = "terraform-aws-modules/step-functions/aws"
 
@@ -61,3 +124,5 @@ EOF
     Environment = var.environment
   }
 }
+
+
