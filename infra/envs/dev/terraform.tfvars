@@ -1,2 +1,4 @@
-lambda_function_name = "dev-us-east-1-beca-2026-lambda-pokeapi"
 environment          = "dev"
+lambda_function_name = "dev-us-east-1-beca-2026-lambda-pokeapi"
+s3_bucket_name       = "dev-us-east-1-beca-2026-bucket-pokeapi"
+# step_function_name   = "dev-us-east-1-beca-2026-step-function"
