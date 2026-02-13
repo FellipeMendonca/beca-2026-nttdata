@@ -130,6 +130,55 @@ resource "aws_glue_job" "bronze_silver_gj_pokeapi_etl" {
   }
 }
 
+
+resource "aws_s3_object" "silver_gold_gj_pokeapi_etl_script" {
+  bucket = aws_s3_bucket.pokeapi_bucket.id
+  key    = "jobs/silver_gold.py"
+  source = "../src/glue_jobs/silver_gold.py"
+}
+
+
+
+resource "aws_glue_job" "silver_gold_gj_pokeapi_etl" {
+  name              = var.silver_gold_glue_job_name_pokeapi
+  description       = "Glue responsável por processar os dados da Silver para Gold transformando em um formato otimizado para análise e consulta."
+  role_arn          = "arn:aws:iam::163867913141:role/soujava-pokeapi-sample-glue-role"
+  glue_version      = "5.0"
+  max_retries       = 0
+  timeout           = 2880
+  number_of_workers = 10
+  worker_type       = "G.1X"
+  execution_class   = "STANDARD"
+
+  command {
+    script_location = "s3://${aws_s3_bucket.pokeapi_bucket.bucket}/jobs/silver_gold.py"
+    name            = "glueetl"
+    python_version  = "3"
+  }
+
+  notification_property {
+    notify_delay_after = 3 # delay in minutes
+  }
+
+  default_arguments = {
+    "--job-language"                     = "python"
+    "--continuous-log-logGroup"          = "/aws-glue/jobs"
+    "--enable-continuous-cloudwatch-log" = "true"
+    "--enable-continuous-log-filter"     = "true"
+  }
+
+  execution_property {
+    max_concurrent_runs = 1
+  }
+
+  tags = {
+    Name        = "beca-2026-pokeapi-etl"
+    Squad       = "Formação 2026"
+    Company     = "NTT Data"
+    Environment = var.environment
+  }
+}
+
 module "step_function" {
   source = "terraform-aws-modules/step-functions/aws"
 
