@@ -1,0 +1,1 @@
+bucket_name = "dev-us-east-1-beca-2026-nttdata-dataops"

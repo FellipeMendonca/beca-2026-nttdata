@@ -1,0 +1,68 @@
+name: "Terraform Workflow"
+
+on:
+    workflow_call:
+        inputs:
+            environment:
+                description: "The environment to deploy to"
+                required: true
+                type: string
+            aws-assume-role-arn:
+                description: "The ARN of the AWS role to assume for deployment"
+                required: true
+                type: string
+            aws-region:
+                description: "The AWS region to deploy to"
+                required: true
+                type: string
+            aws-statefile-s3-bucket:
+                description: "The name of the S3 bucket to use for Terraform state files"
+                required: true
+                type: string
+            aws-lock-dynamodb-table:
+                description: "The name of the DynamoDB table to use for Terraform state locking"
+                required: true
+                type: string
+jobs:
+    terraform:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: bash
+        steps:
+            - name: "Checkout code"
+              uses: actions/checkout@v4
+
+            - name: "Set up Terraform"
+              uses: hashicorp/setup-terraform@v3
+              with:
+                  terraform_version: 1.8.3
+
+            - name: "Configure AWS credentials"
+              uses: aws-actions/configure-aws-credentials@v2
+              with:
+                  role-to-assume: ${{ inputs.aws-assume-role-arn }}
+                  role-session-name: "GitHub_to_AWS_via_FederatedOIDC"
+                  aws-region: ${{ inputs.aws-region }}
+
+            - name: "Initialize Terraform"
+              run: cd infra && terraform init \
+                  -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}" \
+                  -backend-config="key=${{ github.event.repository.name }}" \
+                  -backend-config="region=${{ inputs.aws-region }}" \
+                  -backend-config="dynamodb_table=${{ inputs.aws-lock-dynamodb-table }}"
+
+            - name: "Terraform Validate"
+              run: terraform validate
+
+            - name: "Plan Terraform changes"
+              id: terraform-plan
+              run: cd infra && \
+                  terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
+                  terraform plan -var-file=./envs/${{ inputs.environment }}/terraform.tfvars -out="${{ inputs.environment }}.tfplan"
+
+            - name: "Apply Terraform changes"
+              id: terraform-apply
+              run: cd infra && \
+                  terraform workspace select ${{ inputs.environment }} || terraform workspace new ${{ inputs.environment }} &&
+                  terraform apply "${{ inputs.environment }}.tfplan"
