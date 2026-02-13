@@ -1,1 +1,7 @@
-bucket_name = "prd-us-east-1-beca-2026-nttdata-dataops"
+environment                         = "prd"
+lambda_function_name                = "prd-us-east-1-beca-2026-lambda-pokeapi"
+s3_bucket_name                      = "prd-us-east-1-beca-2026-bucket-pokeapi"
+lz_bronze_glue_job_name_pokeapi     = "prd-us-east-1-beca-2026-glue-job-lz-bronze-pokeapi"
+bronze_silver_glue_job_name_pokeapi = "prd-us-east-1-beca-2026-glue-job-bronze-silver-pokeapi"
+silver_gold_glue_job_name_pokeapi   = "prd-us-east-1-beca-2026-glue-job-silver-gold-pokeapi"
+step_function_name                  = "prd-us-east-1-beca-2026-step-function-pokeapi"
