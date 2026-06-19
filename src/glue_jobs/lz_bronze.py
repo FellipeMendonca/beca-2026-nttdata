@@ -11,31 +11,33 @@ sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 
-# Define source and destination S3 buckets
-source_bucket = "s3://dev-us-east-1-beca-2026-bucket-pokeapi/LZ/pokemon_data.json"
-destination_bucket = (
-    "s3://dev-us-east-1-beca-2026-bucket-pokeapi/BRONZE/pokemon_data.parquet"
-)
+# Get job parameters
+args = getResolvedOptions(sys.argv, ["BUCKET_NAME"])
+bucket_name = args["BUCKET_NAME"]
+
+# Define source and destination S3 paths
+source_bucket = f"s3://{bucket_name}/LZ/pokemon_data.json"
+destination_bucket = f"s3://{bucket_name}/BRONZE/pokemon_data.parquet"
 
 # Initialize S3 client
 s3 = boto3.client("s3")
 
 
-def delete_s3_files(bucket_name, prefix):
+def delete_s3_files(bucket, prefix):
     """Deletes existing Parquet files in the specified S3 bucket and prefix."""
-    response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
     if "Contents" in response:
         for obj in response["Contents"]:
-            s3.delete_object(Bucket=bucket_name, Key=obj["Key"])
-        print(f"All files deleted from {bucket_name}/{prefix}")
+            s3.delete_object(Bucket=bucket, Key=obj["Key"])
+        print(f"All files deleted from {bucket}/{prefix}")
     else:
-        print(f"No files found in {bucket_name}/{prefix}")
+        print(f"No files found in {bucket}/{prefix}")
 
 
 def main():
     try:
         # Delete existing files in destination bucket before writing new ones
-        delete_s3_files("dev-us-east-1-beca-2026-bucket-pokeapi", "BRONZE/")
+        delete_s3_files(bucket_name, "BRONZE/")
 
         # Read JSON data from S3
         pokemon_df = spark.read.json(source_bucket)

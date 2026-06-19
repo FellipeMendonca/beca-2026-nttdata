@@ -1,4 +1,5 @@
 import json
+import os
 import requests
 import boto3
 
@@ -7,7 +8,7 @@ def lambda_handler(event, context):
     url = "https://pokeapi.co/api/v2/pokemon/"
     pokemon_list = []
     s3 = boto3.client("s3")
-    bucket_name = "dev-us-east-1-beca-2026-bucket-pokeapi"
+    bucket_name = os.environ["BUCKET_NAME"]
     file_name = "LZ/pokemon_data.json"
 
     for i in range(1, 152):  # Loop to get first 151 Pokémon
