@@ -7,22 +7,22 @@ on:
                 description: "The environment to deploy to"
                 required: true
                 type: string
-            aws-assume-role-arn:
-                description: "The ARN of the AWS role to assume for deployment"
+        secrets:
+            AWS_SECRET_ID:
+                description: "The AWS Access Key ID"
                 required: true
-                type: string
-            aws-region:
+            AWS_SECRET_KEY:
+                description: "The AWS Secret Access Key"
+                required: true
+            AWS_REGION:
                 description: "The AWS region to deploy to"
                 required: true
-                type: string
-            aws-statefile-s3-bucket:
+            AWS_STATEFILE_S3_BUCKET:
                 description: "The name of the S3 bucket to use for Terraform state files"
                 required: true
-                type: string
-            aws-lock-dynamodb-table:
+            AWS_LOCK_DYNAMODB_TABLE:
                 description: "The name of the DynamoDB table to use for Terraform state locking"
                 required: true
-                type: string
 jobs:
     terraform:
         runs-on: ubuntu-latest
@@ -41,9 +41,9 @@ jobs:
             - name: "Configure AWS credentials"
               uses: aws-actions/configure-aws-credentials@v2
               with:
-                  role-to-assume: ${{ inputs.aws-assume-role-arn }}
-                  role-session-name: "GitHub_to_AWS_via_FederatedOIDC"
-                  aws-region: ${{ inputs.aws-region }}
+                  aws-access-key-id: ${{ secrets.AWS_SECRET_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+                  aws-region: ${{ secrets.AWS_REGION }}
 
             - name: "Read destroy configuration"
               id: read-destroy-config
@@ -53,10 +53,10 @@ jobs:
 
             - name: "Initialize Terraform"
               run: cd infra && terraform init
-                  -backend-config="bucket=${{ inputs.aws-statefile-s3-bucket }}"
+                  -backend-config="bucket=${{ secrets.AWS_STATEFILE_S3_BUCKET }}"
                   -backend-config="key=${{ github.event.repository.name }}"
-                  -backend-config="region=${{ inputs.aws-region }}"
-                  -backend-config="dynamodb_table=${{ inputs.aws-lock-dynamodb-table }}"
+                  -backend-config="region=${{ secrets.AWS_REGION }}"
+                  -backend-config="dynamodb_table=${{ secrets.AWS_LOCK_DYNAMODB_TABLE }}"
 
             - name: "Terraform Validate"
               run: terraform validate
