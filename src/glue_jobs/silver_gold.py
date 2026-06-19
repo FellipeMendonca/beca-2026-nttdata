@@ -13,25 +13,31 @@ sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
 
-# Define source and destination S3 buckets
-source_bucket = "s3://dev-us-east-1-beca-2026-bucket-pokeapi/SILVER/pokemon_data.parquet"  # Replace with actual bucket
-destination_bucket = "s3://dev-us-east-1-beca-2026-bucket-pokeapi/GOLD/pokemon_data.parquet"  # Replace with actual bucket
+# Get job parameters
+args = getResolvedOptions(sys.argv, ["BUCKET_NAME"])
+bucket_name = args["BUCKET_NAME"]
+
+# Define source and destination S3 paths
+source_bucket = f"s3://{bucket_name}/SILVER/pokemon_data.parquet"
+destination_bucket = f"s3://{bucket_name}/GOLD/pokemon_data.parquet"
 
 # Initialize S3 client
 s3 = boto3.client("s3")
 
-def delete_s3_files(bucket_name):
-    response = s3.list_objects_v2(Bucket=bucket_name)
+
+def delete_s3_files(bucket):
+    response = s3.list_objects_v2(Bucket=bucket)
     if "Contents" in response:
         for obj in response["Contents"]:
             if "GOLD/pokemon_data.parquet" in obj["Key"]:
-                s3.delete_object(Bucket=bucket_name, Key=obj["Key"])
-        print(f"All files deleted from {bucket_name}")
+                s3.delete_object(Bucket=bucket, Key=obj["Key"])
+        print(f"All files deleted from {bucket}")
     else:
-        print(f"No files found in {bucket_name}")
+        print(f"No files found in {bucket}")
+
 
 # Delete existing files in destination bucket before writing new ones
-delete_s3_files("dev-us-east-1-beca-2026-bucket-pokeapi")
+delete_s3_files(bucket_name)
 
 # Read Parquet data from S3
 pokemon_df = spark.read.parquet(source_bucket)
@@ -53,7 +59,7 @@ glueContext.write_dynamic_frame.from_options(
     frame=dynamic_frame,
     connection_type="s3",
     connection_options={"path": destination_bucket},
-    format="parquet"
+    format="parquet",
 )
 
 print("Parquet to Parquet transformation complete with base stats columns!")

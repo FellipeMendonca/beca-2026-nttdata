@@ -12,6 +12,11 @@ module "lambda_function" {
 
   source_path             = "../src/lambda"
   ignore_source_code_hash = true
+
+  environment_variables = {
+    BUCKET_NAME = var.s3_bucket_name
+  }
+
   tags = {
     Name        = "beca-2026-pokeapi-etl"
     Squad       = "Formação 2026"
@@ -67,6 +72,7 @@ resource "aws_glue_job" "lz_bronze_gj_pokeapi_etl" {
     "--continuous-log-logGroup"          = "/aws-glue/jobs"
     "--enable-continuous-cloudwatch-log" = "true"
     "--enable-continuous-log-filter"     = "true"
+    "--BUCKET_NAME"                      = var.s3_bucket_name
   }
 
   execution_property {
@@ -116,6 +122,7 @@ resource "aws_glue_job" "bronze_silver_gj_pokeapi_etl" {
     "--continuous-log-logGroup"          = "/aws-glue/jobs"
     "--enable-continuous-cloudwatch-log" = "true"
     "--enable-continuous-log-filter"     = "true"
+    "--BUCKET_NAME"                      = var.s3_bucket_name
   }
 
   execution_property {
@@ -165,6 +172,7 @@ resource "aws_glue_job" "silver_gold_gj_pokeapi_etl" {
     "--continuous-log-logGroup"          = "/aws-glue/jobs"
     "--enable-continuous-cloudwatch-log" = "true"
     "--enable-continuous-log-filter"     = "true"
+    "--BUCKET_NAME"                      = var.s3_bucket_name
   }
 
   execution_property {
